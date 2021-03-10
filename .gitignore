@@ -1,0 +1,10 @@
+config.py
+dist
+venv
+*.egg-info
+*.pyc
+*~
+# eclipse
+.settings
+.project
+.pydevproject
