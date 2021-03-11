@@ -8,15 +8,7 @@ import logging
 import os
 import sys
 import pkg_resources
-import toscience.config
-
-
-apiurl = toscience.config.apiurl
-namespace = toscience.config.namespace
-user = toscience.config.user
-password = toscience.config.password
-datadir = toscience.config.datadir
-collectionUrl = toscience.config.collectionUrl
+from toscience.cli.config import apiurl, namespace, password, datadir, collectionUrl
 
 
 version = pkg_resources.require("toscience.cli")[0].version
@@ -31,9 +23,9 @@ class Client:
         self.path = "resource"
 
     def _make_rest_uri(self, parentPID, query=""):
-        """create the uri for the restfull webservice of orcid"""
+        """create the uri for the restfull webservice"""
         
-        path = "/".join((self.path, parentPID, "postResearchData"))
+        path = "/".join((self.path, parentPID, self.endpoint))
         if not self.endpoint:
             logger.error('No valid endpoint specified.')
             rest_uri = None
@@ -68,27 +60,23 @@ class Client:
             return response.text
 
 
-def scan(parentPID, depth):
+def scan(resource_dir, depth):
     """ Return (subdir, filename) Tupels für all files in given directory
 
     Makes currently only sense for depth=1, since the endpoint does not support
     more.
     """
-    resource_dir = os.path.join(datadir, parentPID)
+    
     resources = []
+    logger.info("Scanning Directory %s" % resource_dir)
     toplevel = resource_dir.count(os.path.sep)
     for root, directories, files in os.walk(resource_dir, topdown=True):
         level = root.count(os.path.sep) - toplevel
-        subdir = os.path.split(root)[-1]
         if level <= depth:
             for file in files:
-                resources.append((subdir, file))
-      
+                resources.append((os.path.relpath(root, resource_dir), file))
+    resources.sort()
     return resources
-
-
-
-
 
 
 def main():
@@ -117,7 +105,18 @@ def main():
     if args.version:
         print("toscience.cli version %s" % version)
         sys.exit(0)
-    print(args) 
+    
+    if args.pid:
+        parentPID = args.pid
+        client = Client("postResearchData")
+        resource_dir = os.path.join(datadir, parentPID)
+        if not os.path.exists(resource_dir):
+            logger.error("Resource Directory %s does not exist" % resource_dir)
+            sys.exit(0)
+
+        for subdir, filename in scan(resource_dir, 1):
+            logger.info("file %s in  subdir %s" % (filename, subdir))
+            #client.add(parentPID, subdir, filename)
 
 
 
@@ -127,7 +126,7 @@ if __name__ == '__main__':
     client = Client("postResearchData")
     for subdir, filename in scan(parentPID, 1):
         print(subdir, filename)
-        client.add(parentPID, subdir, filename)
+        #client.add(parentPID, subdir, filename)
 
     
     

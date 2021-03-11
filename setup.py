@@ -22,6 +22,8 @@ setup(
         'requests',
     ],
     classifiers=[
+        "Development Status :: 1 - Planning",
+        "Environment :: Console",
         "Programming Language :: Python :: 3",
     ],
     license="DFSL",
