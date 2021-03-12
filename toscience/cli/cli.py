@@ -8,8 +8,7 @@ import logging
 import os
 import sys
 import pkg_resources
-from toscience.cli.config import apiurl, namespace, password, datadir, collectionUrl
-
+from toscience.cli.config import apiurl, namespace, user, password, datadir, collectionUrl
 
 version = pkg_resources.require("toscience.cli")[0].version
 logger = logging.getLogger(__name__)
@@ -51,14 +50,14 @@ class Client:
         auth = (user, password)
 
         url = self._make_rest_uri(query=query, parentPID= parentPID)
-        print (url)
+        """
         response = requests.post(url, auth=auth, headers=headers)
         print(response)
         if (response.status_code != 200):
             return str(response.status_code) + " " + response.text
         else:
             return response.text
-
+        """
 
 def scan(resource_dir, depth):
     """ Return (subdir, filename) Tupels für all files in given directory
@@ -94,19 +93,19 @@ def main():
     subparsers = parser.add_subparsers(help='available sub-commands')
     # create the parser for the "ingest" command
     parser_ingest = subparsers.add_parser('ingest', help='Batch ingesting a directory')
-    parser_ingest.add_argument('pid', help="PID")
+    parser_ingest.add_argument('pid', help="PID of the parent Object")
 
     # create the parser for the "user" command
     parser_ingest = subparsers.add_parser('user', help='Manage api users (not yet implemented)')
     
   
     args = parser.parse_args()
-    logfile = args.logfile
+
     if args.version:
         print("toscience.cli version %s" % version)
         sys.exit(0)
-    
-    if args.pid:
+
+    if hasattr(args, 'pid'):
         parentPID = args.pid
         client = Client("postResearchData")
         resource_dir = os.path.join(datadir, parentPID)
@@ -115,9 +114,8 @@ def main():
             sys.exit(0)
 
         for subdir, filename in scan(resource_dir, 1):
-            logger.info("file %s in  subdir %s" % (filename, subdir))
-            #client.add(parentPID, subdir, filename)
-
+            logger.info("%s, %s" % (subdir, filename))
+            client.add(parentPID, subdir, filename)
 
 
 if __name__ == '__main__':
