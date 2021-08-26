@@ -34,6 +34,7 @@ setup(
     entry_points={
         'console_scripts': [
             'toscience=toscience.cli.cli:main',
+            'sizes=toscience.cli.sizes:main',
         ]
     },
 )
