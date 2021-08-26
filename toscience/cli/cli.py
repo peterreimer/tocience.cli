@@ -50,14 +50,14 @@ class Client:
         auth = (user, password)
 
         url = self._make_rest_uri(query=query, parentPID= parentPID)
-        """
+        
         response = requests.post(url, auth=auth, headers=headers)
         print(response)
         if (response.status_code != 200):
             return str(response.status_code) + " " + response.text
         else:
             return response.text
-        """
+        
 
 def scan(resource_dir, depth):
     """ Return (subdir, filename) Tupels für all files in given directory
