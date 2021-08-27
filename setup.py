@@ -20,6 +20,8 @@ setup(
         'setuptools',
         'argparse',
         'requests',
+        'bitmath'
+
     ],
     classifiers=[
         "Development Status :: 1 - Planning",

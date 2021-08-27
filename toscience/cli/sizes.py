@@ -5,17 +5,21 @@ import argparse
 import os
 import sys
 import json
+import bitmath
 
-
-def get_sizes(path):
+def get_sizes(root_dir):
 
     sizes = {}
-    for root, dirs, files in os.walk(path):
+    for root, dirs, files in os.walk(root_dir):
         for file in files:
-            path = os.path.join(root, file)
-            size = os.path.getsize(path)
-            #list_of_files.append((path, size))
-            sizes[path] = size
+            rel_dir = os.path.relpath(root, root_dir)
+            rel_file = os.path.join(rel_dir, file)
+            abs_file = os.path.join(root, file)
+            bytes = os.path.getsize(abs_file)
+            size = bitmath.Byte(bytes).best_prefix(system=bitmath.SI)
+            #print(s)
+            #size = bitmath.getsize(abs_file, system=bitmath.SI)
+            sizes[rel_file] = {'bytes': bytes, 'human':size.format("{value:.1f}{unit}")}
 
     return json.dumps(sizes, indent=4)
 
@@ -31,7 +35,3 @@ def main():
     else:
         print("%s is not a directory" % args.directory)
         sys.exit(0)
-
-
-
-
